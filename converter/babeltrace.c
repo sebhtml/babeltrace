@@ -696,14 +696,16 @@ int check_event_with_filter(struct bt_context *ctx,
 		enum bt_ctf_type_id type_id = declaration->id;
 		char *event_field_name = g_quark_to_string(field->name);
 
-		printf("i: %d -> name: %s type_id: %d\n", i, event_field_name, type_id);
+		printf("i: %d -> name: %s type_id: %d value: ", i, event_field_name, type_id);
 
 		if (type_id == CTF_TYPE_STRING)
-			printf("%s\n", bt_ctf_get_string(field));
+			printf("%s", bt_ctf_get_string(field));
 		else if (type_id == CTF_TYPE_INTEGER)
-			printf("%d\n", bt_ctf_get_int64(field));
+			printf("%d", bt_ctf_get_int64(field));
 		else
-			printf("???\n");
+			printf("???");
+
+		printf("\n");
         }
 
 /*
@@ -751,10 +753,10 @@ struct definition_struct {
 
 	printf("event_definition %x event_fields %x declaration %x\n",
 		event_definition, event_fields, declaration);
+	printf("declaration %x field_name %d\n", declaration, field_name);
 */
 	field_name = g_quark_from_string(filter_field);
 
-	printf("declaration %x field_name %d\n", declaration, field_name);
 
 	field_index = bt_struct_declaration_lookup_field_index(declaration, field_name);
 

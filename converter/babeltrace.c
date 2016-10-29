@@ -662,8 +662,8 @@ end:
 
 
 /**
- * \brief Check an event against filter options
- * \return 1 if the event is accepted
+ * @brief Check an event against filter options
+ * @return 1 if the event is accepted
  */
 static
 int check_event_with_filter(struct bt_context *ctx,

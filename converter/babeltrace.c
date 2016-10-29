@@ -667,22 +667,101 @@ end:
  */
 static
 int check_event_with_filter(struct bt_context *ctx,
-	      struct bt_ctf_event *event
+	      struct bt_ctf_event *ctf_event
         )
 {
-	char *filter_field = "minimumSize";
+	struct ctf_stream_definition *stream;
+	struct ctf_event_definition *event;
+	uint64_t id;
+	struct declaration_struct *declaration;
+
+	char *filter_field = "targetName";
 	int filter_value = 4;
+	int field_index;
+	GQuark field_name;
+	GPtrArray *fields;
+
+	printf("Event %lld\n", id);
+
+	stream = ctf_event->parent->stream;
+	id = stream->event_id;
+	event = g_ptr_array_index(stream->events_by_id, id);
+	declaration = event->event_fields->declaration;
+	fields = event->event_fields->fields;
+
+        for (int i = 0; i < fields->len; i++) {
+                struct bt_definition *field =
+                        g_ptr_array_index(fields, i);
+		struct bt_declaration *declaration = field->declaration;
+		enum bt_ctf_type_id type_id = declaration->id;
+		char *event_field_name = g_quark_to_string(field->name);
+
+		printf("i: %d -> name: %s type_id: %d\n", i, event_field_name, type_id);
+        }
+
+/*
 	struct ctf_event_definition *event_definition;
 	struct definition_struct *event_fields;
 	struct declaration_struct *declaration;
 	GHashTable *fields_by_name;
 	GPtrArray *fields;
 
+struct bt_ctf_event {
+        struct ctf_event_definition *parent;
+};
+
+struct ctf_event_definition {
+        struct ctf_stream_definition *stream;
+        struct definition_struct *event_context;
+        struct definition_struct *event_fields;
+};
+
+
+struct definition_struct {
+        struct bt_definition p;
+        struct declaration_struct *declaration;
+        GPtrArray *fields;            
+};
+
+*/
+
+/*
+
+
+	printf("event->parent->stream %x\n", event->parent->stream);
+	printf("event->parent->event_context %x\n", event->parent->event_context);
+	printf("event->parent->event_fields %x\n", event->parent->event_fields);
+
+*/
+	//declaration = event->parent->event_context->declaration;
+
+	//declaration = g_ptr_array_index(event->parent->stream->events_by_id, event->parent->stream->event_id).declaration;
+	
+/*
 	event_definition = event->parent;
 	event_fields = event_definition->event_fields;
 	declaration = event_fields->declaration;
-	fields_by_name = declaration->fields_by_name;
-	fields = event_fields->fields;
+
+	printf("event_definition %x event_fields %x declaration %x\n",
+		event_definition, event_fields, declaration);
+*/
+	field_name = g_quark_from_string(filter_field);
+
+	printf("declaration %x field_name %d\n", declaration, field_name);
+
+	field_index = bt_struct_declaration_lookup_field_index(declaration, field_name);
+
+	printf("filter_field: %s field_index: %d\n", filter_field, field_index);
+
+
+	return 1;
+	if (field_index == -1) {
+		return 0;
+	}
+
+
+	//fields_by_name = declaration->fields_by_name;
+	//fields = event_fields->fields;
 
 
 	return 1;

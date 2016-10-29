@@ -660,7 +660,19 @@ end:
 	return ret;
 }
 
+
+/**
+ * \brief Check an event against filter options
+ * \return 1 if the event is accepted
+ */
 static
+int check_event_with_filter(struct bt_context *ctx,
+	      struct bt_ctf_event *ctf_event
+        )
+{
+	return 1;
+}
+
 int convert_trace(struct bt_trace_descriptor *td_write,
 		  struct bt_context *ctx)
 {
@@ -669,6 +681,7 @@ int convert_trace(struct bt_trace_descriptor *td_write,
 	struct bt_iter_pos *begin_pos = NULL, *end_pos = NULL;
 	struct bt_ctf_event *ctf_event;
 	int ret;
+	int write_event;
 
 	sout = container_of(td_write, struct ctf_text_stream_pos,
 			trace_descriptor);
@@ -689,11 +702,20 @@ int convert_trace(struct bt_trace_descriptor *td_write,
 		goto error_iter;
 	}
 	while ((ctf_event = bt_ctf_iter_read_event(iter))) {
-		ret = sout->parent.event_cb(&sout->parent, ctf_event->parent->stream);
-		if (ret) {
-			fprintf(stderr, "[error] Writing event failed.\n");
-			goto end;
+
+		/* Verify if the event must be written */
+		write_event = check_event_with_filter(ctx, ctf_event);
+
+		/* Write the event */
+		if (write_event) {
+			ret = sout->parent.event_cb(&sout->parent, ctf_event->parent->stream);
+			if (ret) {
+				fprintf(stderr, "[error] Writing event failed.\n");
+				goto end;
+			}
 		}
+
+		/* Now, get the next event */
 		ret = bt_iter_next(bt_ctf_get_iter(iter));
 		if (ret < 0) {
 			goto end;

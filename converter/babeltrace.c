@@ -681,7 +681,7 @@ int check_event_with_filter(struct bt_context *ctx,
 	GQuark field_name;
 	GPtrArray *fields;
 
-	printf("Event %lld\n", id);
+	printf("Event %d\n", id);
 
 	stream = ctf_event->parent->stream;
 	id = stream->event_id;
@@ -697,6 +697,13 @@ int check_event_with_filter(struct bt_context *ctx,
 		char *event_field_name = g_quark_to_string(field->name);
 
 		printf("i: %d -> name: %s type_id: %d\n", i, event_field_name, type_id);
+
+		if (type_id == CTF_TYPE_STRING)
+			printf("%s\n", bt_ctf_get_string(field));
+		else if (type_id == CTF_TYPE_INTEGER)
+			printf("%d\n", bt_ctf_get_int64(field));
+		else
+			printf("???\n");
         }
 
 /*

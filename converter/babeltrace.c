@@ -667,10 +667,33 @@ end:
  */
 static
 int check_event_with_filter(struct bt_context *ctx,
-	      struct bt_ctf_event *ctf_event
+	      struct bt_ctf_event *event
         )
 {
+	// TODO use event->event_fields
 	return 1;
+
+	struct bt_ctf_event_class *class;
+	struct bt_ctf_clock *clock;
+	struct bt_ctf_field_type *field_type;
+	struct bt_ctf_field *field;
+	int field_count;
+	int ret;
+	char *field_name;
+
+	//clock = bt_ctf_event_get_clock(event);
+
+	class = bt_ctf_event_get_class(event);
+	field_count = bt_ctf_event_class_get_field_count(class);
+
+
+	for (int i = 0; i < field_count; ++i) {
+		ret = bt_ctf_event_class_get_field(class, &field_name, &field_type, i);
+
+		/* With the event class field name, get the payload */
+		/*field = bt_ctf_event_get_payload(event, field_name);*/
+	}
+
 }
 
 int convert_trace(struct bt_trace_descriptor *td_write,
@@ -681,7 +704,8 @@ int convert_trace(struct bt_trace_descriptor *td_write,
 	struct bt_iter_pos *begin_pos = NULL, *end_pos = NULL;
 	struct bt_ctf_event *ctf_event;
 	int ret;
-	int write_event;
+	int write_event = 1;
+	int use_filter = 1;
 
 	sout = container_of(td_write, struct ctf_text_stream_pos,
 			trace_descriptor);
@@ -703,8 +727,13 @@ int convert_trace(struct bt_trace_descriptor *td_write,
 	}
 	while ((ctf_event = bt_ctf_iter_read_event(iter))) {
 
-		/* Verify if the event must be written */
-		write_event = check_event_with_filter(ctx, ctf_event);
+		if (use_filter) {
+			/* Verify if the event must be written */
+			write_event = check_event_with_filter(ctx, ctf_event);
+
+			/* Re-read the event */
+			//ctf_event = bt_ctf_iter_read_event(iter);
+		}
 
 		/* Write the event */
 		if (write_event) {

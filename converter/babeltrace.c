@@ -672,6 +672,19 @@ int check_event_with_filter(struct bt_context *ctx,
 {
 	char *filter_field = "minimumSize";
 	int filter_value = 4;
+	struct ctf_event_definition *event_definition;
+	struct definition_struct *event_fields;
+	struct declaration_struct *declaration;
+	GHashTable *fields_by_name;
+	GPtrArray *fields;
+
+	event_definition = event->parent;
+	event_fields = event_definition->event_fields;
+	declaration = event_fields->declaration;
+	fields_by_name = declaration->fields_by_name;
+	fields = event_fields->fields;
+
+
 	return 1;
 }
 
